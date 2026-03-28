@@ -85,11 +85,15 @@ Router-specific routes:
 - `/api/router/*`
 - `/v1/router/*`
 
-## Notes For Publishing
+## Note 
 
-- Review the git index before your first push. Older commits may still contain generated files or inventory snapshots.
-- If you want a clean public history, squash or rebuild the branch before publishing.
-- Keep `servers.json` local unless you deliberately want to publish that inventory.
+Yeah everything before this is true, but I made this tool to aggregate exposed ollama instances for research purposes.
+
+Most of this project is a hacky, vibecoded mess with some of my human slop in between and you'll probably only ever use the web part or openai-compatible router. I left in old/ intentionally.
+
+I DO NOT take responsibility for how you use this tool and DO NOT condone the usage of exposed ollama instances without consent. This project is made to raise awareness and make the internet more secure.
+
+btw feel free to use this for it's pseudo-intended purpose of aggregating and routing your own ollama servers, too.
 
 ---
 
