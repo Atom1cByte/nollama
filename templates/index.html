@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOllama</title>
+    <style>
+        :root {
+            --bg: #130f0d;
+            --panel: #1b1612;
+            --panel-alt: #2a211b;
+            --line: #62513f;
+            --text: #f2eadf;
+            --muted: #c7b8a5;
+            --brand: #d8bf8a;
+            --brand-strong: #b38a4a;
+            --danger: #d17967;
+            --warning: #d3ab68;
+            --ok: #9fb277;
+            --poster: #8f231d;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            background:
+                radial-gradient(circle at top, rgba(216, 191, 138, 0.08), transparent 26%),
+                radial-gradient(circle at 80% 10%, rgba(143, 35, 29, 0.24), transparent 30%),
+                linear-gradient(180deg, #0b0908 0%, #130f0d 38%, #1a1410 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .shell {
+            width: min(1240px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 24px 0 40px;
+        }
+
+        .hero, .card {
+            position: relative;
+            background: linear-gradient(180deg, rgba(27, 22, 18, 0.96), rgba(20, 16, 13, 0.96));
+            border: 1px solid rgba(216, 191, 138, 0.22);
+            border-radius: 24px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+            overflow: hidden;
+        }
+
+        .hero::before, .card::before {
+            content: "";
+            position: absolute;
+            inset: 10px;
+            border: 1px solid rgba(216, 191, 138, 0.12);
+            border-radius: 18px;
+            pointer-events: none;
+        }
+
+        .hero {
+            padding: 34px 28px 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: Baskerville, "Palatino Linotype", "Book Antiqua", serif;
+            font-size: clamp(2.8rem, 7vw, 5.6rem);
+            line-height: 1.05;
+            text-transform: lowercase;
+            letter-spacing: 0.14em;
+            font-weight: 400;
+        }
+
+        .hero p, .muted { color: var(--muted); }
+
+        .stat-grid, .layout, .quick-actions, .composer-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .stat-grid {
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            margin-top: 24px;
+        }
+
+        .stat {
+            background: linear-gradient(180deg, rgba(43, 33, 27, 0.82), rgba(26, 20, 16, 0.88));
+            border: 1px solid rgba(216, 191, 138, 0.14);
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 1.8rem;
+            margin-top: 8px;
+        }
+
+        .quick-actions {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            margin-top: 18px;
+        }
+
+        .layout {
+            grid-template-columns: 1.05fr 0.95fr;
+            align-items: start;
+        }
+
+        .card {
+            padding: 22px;
+        }
+
+        .card h2 {
+            margin: 0 0 8px;
+            font-family: Baskerville, "Palatino Linotype", "Book Antiqua", serif;
+            font-size: 1.3rem;
+            font-weight: 400;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .card-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        button, input, textarea, select {
+            font: inherit;
+        }
+
+        button {
+            border: 1px solid rgba(216, 191, 138, 0.2);
+            border-radius: 14px;
+            padding: 12px 16px;
+            cursor: pointer;
+            background: linear-gradient(180deg, rgba(42, 33, 27, 0.9), rgba(29, 23, 18, 0.96));
+            color: var(--text);
+            transition: transform 0.15s ease, background 0.15s ease;
+            letter-spacing: 0.04em;
+        }
+
+        button:hover { transform: translateY(-1px); }
+        .primary { background: linear-gradient(180deg, #d2bf96, #af8750); color: #1f1710; font-weight: 700; }
+        .danger { background: linear-gradient(180deg, rgba(143, 35, 29, 0.44), rgba(92, 24, 20, 0.74)); color: #f0d7d2; }
+
+        .stack { display: grid; gap: 12px; }
+
+        .input, textarea, select {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(216, 191, 138, 0.16);
+            background: rgba(15, 12, 10, 0.84);
+            color: var(--text);
+            padding: 12px 14px;
+        }
+
+        textarea { min-height: 120px; resize: vertical; }
+
+        .endpoint-list, .catalog-list, .chat-log {
+            display: grid;
+            gap: 12px;
+            max-height: 560px;
+            overflow: auto;
+        }
+
+        .row {
+            border: 1px solid rgba(216, 191, 138, 0.12);
+            background: linear-gradient(180deg, rgba(23, 18, 15, 0.88), rgba(17, 14, 11, 0.92));
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .row-top, .row-actions, .chat-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.82rem;
+            background: rgba(216, 191, 138, 0.1);
+            color: var(--muted);
+        }
+
+        .badge.ok { color: #d9ecc0; background: rgba(159, 178, 119, 0.16); }
+        .badge.offline { color: #f1c3b8; background: rgba(143, 35, 29, 0.18); }
+
+        .model-name { font-weight: 700; font-size: 1.05rem; }
+        .small { font-size: 0.9rem; color: var(--muted); }
+        .pillbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+        .chat-shell {
+            display: grid;
+            gap: 14px;
+        }
+
+        .chat-log {
+            min-height: 280px;
+            max-height: 420px;
+            padding-right: 4px;
+        }
+
+        .bubble {
+            border-radius: 18px;
+            padding: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .bubble.user { background: rgba(143, 35, 29, 0.16); border: 1px solid rgba(209, 121, 103, 0.24); }
+        .bubble.assistant { background: rgba(179, 138, 74, 0.1); border: 1px solid rgba(216, 191, 138, 0.18); }
+
+        .composer-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .toast {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            background: rgba(18, 14, 11, 0.96);
+            color: var(--text);
+            border: 1px solid rgba(216, 191, 138, 0.15);
+            padding: 12px 14px;
+            border-radius: 14px;
+            max-width: 320px;
+            z-index: 20;
+        }
+
+        @media (max-width: 980px) {
+            .layout, .composer-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <section class="hero">
+            <h1>nollama</h1>
+
+            <div class="quick-actions">
+                <button class="primary" onclick="refreshDashboard(true)">Refresh live data</button>
+                <button onclick="runHealthCheck()">Run health check</button>
+                <button onclick="window.location.href='/router'">Open public router view</button>
+                <button class="danger" onclick="clearCache()">Clear cache</button>
+            </div>
+
+            <div class="stat-grid" id="summary-grid"></div>
+        </section>
+
+        <div class="layout">
+            <div class="stack">
+                <section class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2>Add or import endpoints</h2>
+                            <div class="muted">Paste hostnames, IPs, or full URLs. Paths are stripped automatically.</div>
+                        </div>
+                    </div>
+                    <div class="stack">
+                        <input id="single-endpoint" class="input" placeholder="http://ollama.internal:11434">
+                        <div class="row-actions">
+                            <button class="primary" onclick="addEndpoint()">Add endpoint</button>
+                            <button onclick="document.getElementById('bulk-endpoints').focus()">Bulk add below</button>
+                        </div>
+                        <textarea id="bulk-endpoints" placeholder="alpha.nollama.net:11434&#10;bravo.nollama.net:11434&#10;ollama.team.local"></textarea>
+                        <div class="row-actions">
+                            <button onclick="bulkAdd()">Add all pasted endpoints</button>
+                            <input id="import-file" class="input" placeholder="D:\team\ollama-endpoints.txt">
+                            <button onclick="loadFromFile()">Load file</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2>Trusted endpoints</h2>
+                            <div class="muted">This is the list the local `/v1/*` compatibility API uses.</div>
+                        </div>
+                        <div class="badge" id="endpoint-count-badge">0 endpoints</div>
+                    </div>
+                    <div class="endpoint-list" id="endpoint-list"></div>
+                </section>
+            </div>
+
+            <div class="stack">
+                <section class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2>Model catalog</h2>
+                            <div class="muted">Grouped by model name so you can see what is available across the fleet.</div>
+                        </div>
+                    </div>
+                    <input id="catalog-search" class="input" placeholder="Search models like llama, qwen, mistral" oninput="renderCatalog()">
+                    <div class="catalog-list" id="catalog-list" style="margin-top: 14px;"></div>
+                </section>
+
+                <section class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2>Quick chat</h2>
+                            <div class="muted" id="chat-selection-label">Pick a model from the catalog to begin.</div>
+                        </div>
+                        <button onclick="clearChat()">Clear chat</button>
+                    </div>
+                    <div class="chat-shell">
+                        <div class="composer-grid">
+                            <select id="chat-endpoint"></select>
+                            <input id="chat-model" class="input" placeholder="Model name">
+                        </div>
+                        <div class="chat-meta">
+                            <span class="badge" id="chat-status">Idle</span>
+                            <span class="small" id="chat-metrics">0 completion tokens</span>
+                        </div>
+                        <div class="chat-log" id="chat-log"></div>
+                        <textarea id="chat-input" placeholder="Send a prompt to the selected endpoint" style="min-height: 110px;"></textarea>
+                        <button class="primary" onclick="sendMessage()">Send message</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            summary: {{ inventory.summary|tojson }},
+            endpoints: {{ inventory.endpoints|tojson }},
+            catalog: {{ inventory.catalog|tojson }},
+            chat: [],
+            selectedModel: null,
+            lastUsage: 0
+        };
+
+        function showToast(message) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3200);
+        }
+
+        function formatSize(bytes) {
+            const gb = bytes / (1024 ** 3);
+            return gb >= 1 ? `${gb.toFixed(2)} GB` : `${(bytes / (1024 ** 2)).toFixed(2)} MB`;
+        }
+
+        function setSummary(summary) {
+            state.summary = summary;
+            document.getElementById('summary-grid').innerHTML = [
+                ['Configured endpoints', summary.endpoint_count],
+                ['Healthy right now', summary.online_count],
+                ['Grouped models', summary.catalog_count],
+                ['Model copies', summary.model_count],
+                ['Total footprint', formatSize(summary.total_size || 0)]
+            ].map(([label, value]) => `<div class="stat"><div class="small">${label}</div><strong>${value}</strong></div>`).join('');
+            document.getElementById('endpoint-count-badge').textContent = `${summary.endpoint_count} endpoints`;
+        }
+
+        function renderEndpoints() {
+            const list = document.getElementById('endpoint-list');
+            if (!state.endpoints.length) {
+                list.innerHTML = '<div class="row"><div class="muted">No endpoints configured yet.</div></div>';
+                return;
+            }
+
+            list.innerHTML = state.endpoints.map(endpoint => `
+                <div class="row">
+                    <div class="row-top">
+                        <div>
+                            <div class="model-name">${endpoint.display_name || endpoint.url}</div>
+                            <div class="small">${endpoint.url}</div>
+                            <div class="small">${endpoint.location?.city || 'Unknown city'}, ${endpoint.location?.country_name || 'Unknown country'} • ${endpoint.org || endpoint.isp || 'Unknown owner'}</div>
+                            <div class="small">${endpoint.model_count} models • ${formatSize(endpoint.total_size || 0)} • Ollama ${endpoint.version || 'unknown'}</div>
+                        </div>
+                        <span class="badge ${endpoint.status === 'online' ? 'ok' : 'offline'}">${endpoint.status}</span>
+                    </div>
+                    <div class="pillbar">
+                        ${endpoint.hostnames?.slice(0, 2).map(host => `<span class="badge">${host}</span>`).join('') || ''}
+                        ${endpoint.vulnerability_count ? `<span class="badge offline">${endpoint.vulnerability_count} reported vulns</span>` : ''}
+                        ${endpoint.scan_model_count ? `<span class="badge">${endpoint.scan_model_count} from servers.json</span>` : ''}
+                        ${endpoint.cached ? '<span class="badge">cached</span>' : ''}
+                        ${endpoint.response_time ? `<span class="badge">${endpoint.response_time.toFixed(2)}s</span>` : ''}
+                        ${endpoint.error ? `<span class="badge offline">${endpoint.error}</span>` : ''}
+                    </div>
+                    <div class="row-actions" style="margin-top: 12px;">
+                        <button onclick="prefillChat('${encodeURIComponent(endpoint.url)}')">Use in chat</button>
+                        <button class="danger" onclick="deleteEndpoint('${encodeURIComponent(endpoint.url)}')">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderCatalog() {
+            const search = document.getElementById('catalog-search').value.toLowerCase();
+            const filtered = state.catalog.filter(model =>
+                model.name.toLowerCase().includes(search) ||
+                model.endpoints.some(url => url.toLowerCase().includes(search))
+            );
+
+            const list = document.getElementById('catalog-list');
+            if (!filtered.length) {
+                list.innerHTML = '<div class="row"><div class="muted">No models match this search.</div></div>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(model => `
+                <div class="row">
+                    <div class="row-top">
+                        <div>
+                            <div class="model-name">${model.name}</div>
+                            <div class="small">${model.endpoint_count} endpoints • sample size ${model.sample_size_formatted}</div>
+                        </div>
+                        <button class="primary" onclick='selectModel(${JSON.stringify(JSON.stringify(model))})'>Chat</button>
+                    </div>
+                    <div class="pillbar">${model.endpoints.slice(0, 4).map(url => `<span class="badge">${url}</span>`).join('')}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateChatSelectors(model) {
+            const endpoints = model ? model.endpoints : state.endpoints.map(item => item.url);
+            document.getElementById('chat-endpoint').innerHTML = endpoints.map(url => `<option value="${url}">${url}</option>`).join('');
+            if (model) document.getElementById('chat-model').value = model.name;
+            document.getElementById('chat-selection-label').textContent = model
+                ? `${model.name} is available on ${model.endpoint_count} configured endpoints.`
+                : 'Pick a model from the catalog to begin.';
+        }
+
+        function selectModel(serialized) {
+            const model = JSON.parse(serialized);
+            state.selectedModel = model;
+            updateChatSelectors(model);
+            showToast(`Ready to chat with ${model.name}`);
+        }
+
+        function prefillChat(encodedUrl) {
+            const url = decodeURIComponent(encodedUrl);
+            updateChatSelectors(state.selectedModel);
+            document.getElementById('chat-endpoint').value = url;
+            showToast(`Selected ${url} for chat`);
+        }
+
+        function renderChat() {
+            const log = document.getElementById('chat-log');
+            log.innerHTML = state.chat.map(message => `<div class="bubble ${message.role}">${message.content || '...'}</div>`).join('');
+            log.scrollTop = log.scrollHeight;
+            document.getElementById('chat-status').textContent = state.chat.length ? 'Conversation loaded' : 'Idle';
+            document.getElementById('chat-metrics').textContent = `${state.lastUsage} completion tokens`;
+        }
+
+        async function refreshDashboard(force) {
+            try {
+                const [statsRes, catalogRes] = await Promise.all([
+                    fetch(`/api/stats?refresh=${force ? 'true' : 'false'}`),
+                    fetch(`/api/catalog?refresh=${force ? 'true' : 'false'}`)
+                ]);
+                const stats = await statsRes.json();
+                const catalog = await catalogRes.json();
+                if (!stats.success || !catalog.success) throw new Error('Refresh failed');
+                state.endpoints = stats.stats;
+                state.catalog = catalog.catalog;
+                setSummary(catalog.summary);
+                renderEndpoints();
+                renderCatalog();
+                updateChatSelectors(state.selectedModel);
+            } catch (error) {
+                showToast(error.message || 'Failed to refresh data');
+            }
+        }
+
+        async function runHealthCheck() {
+            await refreshDashboard(true);
+            showToast('Health check complete');
+        }
+
+        async function addEndpoint() {
+            const input = document.getElementById('single-endpoint');
+            const url = input.value.trim();
+            if (!url) return;
+            try {
+                const response = await fetch('/api/endpoints', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+                const data = await response.json();
+                if (!data.success) return showToast(data.error || 'Failed to add endpoint');
+                input.value = '';
+                await refreshDashboard(false);
+                showToast(`Saved ${data.url}`);
+            } catch (error) {
+                showToast('Failed to add endpoint');
+            }
+        }
+
+        async function bulkAdd() {
+            const input = document.getElementById('bulk-endpoints');
+            try {
+                const response = await fetch('/api/endpoints/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ urls: input.value }) });
+                const data = await response.json();
+                if (!data.success) return showToast(data.error || 'Failed to add endpoints');
+                input.value = '';
+                await refreshDashboard(false);
+                showToast(`Added ${data.added.length} endpoints`);
+            } catch (error) {
+                showToast('Failed to add endpoints');
+            }
+        }
+
+        async function loadFromFile() {
+            const filepath = document.getElementById('import-file').value.trim();
+            if (!filepath) return;
+            try {
+                const response = await fetch('/api/endpoints/file', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filepath }) });
+                const data = await response.json();
+                if (!data.success) return showToast(data.error || 'Failed to load file');
+                await refreshDashboard(false);
+                showToast(`Loaded ${data.added.length} endpoints from file`);
+            } catch (error) {
+                showToast('Failed to load file');
+            }
+        }
+
+        async function deleteEndpoint(encodedUrl) {
+            const url = decodeURIComponent(encodedUrl);
+            try {
+                await fetch(`/api/endpoints/${encodeURIComponent(url)}`, { method: 'DELETE' });
+                await refreshDashboard(false);
+                showToast(`Removed ${url}`);
+            } catch (error) {
+                showToast('Failed to remove endpoint');
+            }
+        }
+
+        async function clearCache() {
+            try {
+                await fetch('/api/cache/invalidate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+                await refreshDashboard(true);
+                showToast('Cache cleared');
+            } catch (error) {
+                showToast('Failed to clear cache');
+            }
+        }
+
+        async function sendMessage() {
+            const endpoint = document.getElementById('chat-endpoint').value;
+            const model = document.getElementById('chat-model').value.trim();
+            const input = document.getElementById('chat-input');
+            const prompt = input.value.trim();
+            if (!endpoint || !model || !prompt) return showToast('Select an endpoint, a model, and a prompt first');
+
+            input.value = '';
+            state.chat.push({ role: 'user', content: prompt });
+            state.chat.push({ role: 'assistant', content: '' });
+            renderChat();
+
+            const assistant = state.chat[state.chat.length - 1];
+            document.getElementById('chat-status').textContent = 'Streaming response';
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: endpoint, model, messages: state.chat.slice(0, -1) })
+                });
+
+                if (!response.ok || !response.body) throw new Error(`Request failed (${response.status})`);
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const events = buffer.split('\n\n');
+                    buffer = events.pop() || '';
+
+                    for (const event of events) {
+                        const line = event.trim();
+                        if (!line.startsWith('data: ')) continue;
+                        const payload = line.slice(6);
+                        if (payload === '[DONE]') continue;
+                        const data = JSON.parse(payload);
+                        if (data.error) throw new Error(data.error.message || data.error);
+                        const token = data.choices?.[0]?.delta?.content;
+                        if (token) {
+                            assistant.content += token;
+                            renderChat();
+                        }
+                        if (data.usage) {
+                            state.lastUsage = data.usage.completion_tokens || 0;
+                        }
+                    }
+                }
+
+                document.getElementById('chat-status').textContent = 'Response complete';
+                renderChat();
+            } catch (error) {
+                assistant.content = `Request failed: ${error.message}`;
+                document.getElementById('chat-status').textContent = 'Request failed';
+                renderChat();
+                showToast(error.message || 'Chat failed');
+            }
+        }
+
+        function clearChat() {
+            state.chat = [];
+            state.lastUsage = 0;
+            renderChat();
+        }
+
+        setSummary(state.summary);
+        renderEndpoints();
+        renderCatalog();
+        updateChatSelectors(null);
+        renderChat();
+    </script>
+</body>
+</html>
